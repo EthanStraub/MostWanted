@@ -7,22 +7,20 @@ function app(people){
   var searchType = promptFor("Do you know the name of the person you are looking for? Enter 'yes' or 'no'", yesNo).toLowerCase();
   switch(searchType){
     case 'yes':
-    // TODO: search by name
-    displayPerson(searchByName(people)[0]);
-    return app(data);
+    mainMenu(searchByName(people)[0]);
     break;
     case 'no':
     searchByTraits(people);
     break;
     default:
-    alert("Wrong! Please try again, following the instructions dummy. :)");
-    app(people); // restart app
+    alert("Please try again");
+    app(data); // restart app
     break;
   }
 }
 
 function searchByTraits(people) {
-  let userSearchChoice = prompt("What would you like to search by? 'height', 'weight', 'eye color', 'gender', 'age', 'occupation'.");
+  let userSearchChoice = prompt("What would you like to search by? 'height', 'weight', 'eye color', 'gender', 'age', 'occupation'."+"\n"+"Type 'restart' if you wish you restart your search.");
   let filteredPeople = [];
 
   switch(userSearchChoice) {
@@ -47,6 +45,9 @@ function searchByTraits(people) {
       break;
     case "occupation":
       filteredPeople = searchByOccupation(people);
+      break;
+    case "restart":
+      app(data); // restart
       break;
 
     // so on and so forth
@@ -78,7 +79,10 @@ function searchByHeight(people) {
     }
     // return true if el.height matches userInputHeight
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -90,7 +94,10 @@ function searchByWeight(people) {
       return true;
     }
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -102,7 +109,10 @@ function searchByEyeCol(people) {
       return true;
     }
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -114,7 +124,10 @@ function searchByGender(people) {
       return true;
     }
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -126,7 +139,10 @@ function searchByAge(people) {
       return true;
     }
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -138,7 +154,10 @@ function searchByOccupation(people) {
       return true;
     }
   });
-
+  if (newArray === undefined || newArray.length === 0) {
+    alert("Could not find that individual.");
+    return app(data); // restart
+  }
   return newArray;
 }
 
@@ -161,7 +180,7 @@ function mainMenu(person, people){
     return app(data);
     break;
     case "family":
-    //displayFamily(person, data)
+    displayFamily(person, data)
     break;
     case "descendants":
     displayDescendants(person, data);
@@ -170,7 +189,7 @@ function mainMenu(person, people){
     app(data); // restart
     break;
     case "quit":
-    return; // Quits without returning. This works somehow?
+    return;
     default:
     return mainMenu(person, people); // ask again
   }
@@ -183,7 +202,6 @@ function searchByName(people){
   upperFirstName = firstName[0].toUpperCase() + firstName.substring(1);
   upperLastName = lastName[0].toUpperCase() + lastName.substring(1);
 
-  // TODO: find the person using the name they entered
   let newArray = people.filter(function (el) {
     if( (el.firstName == upperFirstName) && (el.lastName == upperLastName) ) {
       return true;
@@ -207,7 +225,7 @@ function trueAge(age) {
 
 // alerts a list of people
 function displayPeople(people){
-  alert("Results: "+"\n"+people.map(function(person){
+  alert("Search Results: "+"\n"+people.map(function(person){
     return person.firstName + " " + person.lastName;
   }).join("\n"));
 }
@@ -233,7 +251,6 @@ function displayPerson(person){
   personInfo += "Occupation: " + person.occupation + "\n";
   personInfo += "Eye Color: " + person.eyeColor + "\n";
 
-  // TODO: finish getting the rest of the information to display
   alert(personInfo);
 }
 
@@ -267,6 +284,31 @@ function displayDescendants(person, people, allDescend = []) {
       return app(data);
     }
     loopFinish = false;
+  }
+}
+
+function displayFamily(person, people, allFamily = []) {
+  let newArray = people.filter(function (el) {
+      if (person.id === el.id) {
+        return false;
+      } else if( ( (person.id === el.currentSpouse && el.currentSpouse !== null && person.currentSpouse !== null) ||
+        person.id === el.parents[0] ||
+        person.id === el.parents[1] ||
+        person.parents[0] === el.id ||
+        person.parents[1] === el.id ||
+        (person.parents[0] === el.parents[0] && person.parents.length >= 1) ||
+        (person.parents[0] === el.parents[1] && person.parents.length >= 1) ||
+        (person.parents[1] === el.parents[0] && person.parents.length >= 1) ||
+        (person.parents[1] === el.parents[1] && person.parents.length >= 1) ) ) {
+        return true;
+      } else {
+        return false;
+      }
+  });
+
+  if (newArray.length >= 1) {
+    displayPeople(newArray);
+    return app(data);
   }
 }
 

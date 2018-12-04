@@ -23,7 +23,7 @@ function app(people){
 
 function searchByTraits(people) {
   let userSearchChoice = prompt("What would you like to search by? 'height', 'weight', 'eye color', 'gender', 'age', 'occupation'.");
-  let filteredPeople;
+  let filteredPeople = [];
 
   switch(userSearchChoice) {
     case "height, weight":
@@ -56,10 +56,16 @@ function searchByTraits(people) {
       break;
   }
 
-  let foundPerson = filteredPeople[0];
 
-  mainMenu(foundPerson, people);
-
+  if (filteredPeople.length > 1) {
+    displayPeople(filteredPeople);
+    searchByTraits(filteredPeople);
+  } else if (filteredPeople.length === 1) {
+    let foundPerson = filteredPeople[0];
+    mainMenu(foundPerson, people);
+  } else {
+    app(data);
+  }
 }
 
 //search functions
@@ -72,7 +78,7 @@ function searchByHeight(people) {
     }
     // return true if el.height matches userInputHeight
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -84,7 +90,7 @@ function searchByWeight(people) {
       return true;
     }
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -96,7 +102,7 @@ function searchByEyeCol(people) {
       return true;
     }
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -108,7 +114,7 @@ function searchByGender(people) {
       return true;
     }
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -120,7 +126,7 @@ function searchByAge(people) {
       return true;
     }
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -132,7 +138,7 @@ function searchByOccupation(people) {
       return true;
     }
   });
-  resultsLoop(newArray);
+
   return newArray;
 }
 
@@ -155,7 +161,7 @@ function mainMenu(person, people){
     return app(data);
     break;
     case "family":
-    // TODO: get person's family
+    //displayFamily(person, data)
     break;
     case "descendants":
     displayDescendants(person, data);
@@ -164,7 +170,7 @@ function mainMenu(person, people){
     app(data); // restart
     break;
     case "quit":
-    return; // stop execution
+    return; // Quits without returning. This works somehow?
     default:
     return mainMenu(person, people); // ask again
   }
@@ -207,9 +213,10 @@ function displayPeople(people){
 }
 
 function resultsLoop(newArray) {
-  while (newArray.length > 1) {
-    displayPeople(newArray);
-    searchByTraits(newArray);
+  if (newArray.length > 1) {
+
+  } else {
+    return;
   }
 }
 
@@ -230,31 +237,53 @@ function displayPerson(person){
   alert(personInfo);
 }
 
-function displayDescendants(person, people) {
-
-  newArray = checkDescend(person, people)
-
-  resultsLoop(newArray);
+function displayDescendants(person, people, allDescend = []) {
+  var loopFinish = false;
+  let newArray = people.filter(function (el) {
+    if( (person.id == el.parents[0]) || (person.id == el.parents[1]) ) {
+      allDescend.push(el)
+      return true;
+    } else {
+      return false;
+    }
+  });
+  if (newArray.length > 1) {
+    for (i = 0; i < newArray.length; i++) {
+      displayDescendants(newArray[i], data, allDescend);
+    }
+    loopFinish = true;
+  } else if (allDescend.length === 0) {
+    loopFinish = true;
+  }
   //if descendants
   if (newArray.length >= 1) {
-    displayPeople(newArray)
+    displayPeople(allDescend)
     return app(data);
   }
   //if no descendants
-  if (newArray === undefined || newArray.length === 0) {
-    alert("This person has no descendants");
-    return app(data);
+  if (loopFinish) {
+    if (newArray === undefined || newArray.length === 0) {
+      alert("This person has no descendants");
+      return app(data);
+    }
+    loopFinish = false;
   }
 }
 
 function checkDescend(person, people) {
+  var returnNew = false;
   let newArray = people.filter(function (el) {
     if( (person.id == el.parents[0]) || (person.id == el.parents[1]) ) {
-      return person.id;
+      returnNew = true;
     } else {
-      return;
+      returnNew = false;
     }
   });
+  if (returnNew) {
+    checkDescend(person, data);
+  } else {
+    return newArray;
+  }
 }
 
 // function that prompts and validates user input
